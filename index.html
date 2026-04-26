@@ -1,452 +1,423 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>杰佣留言卡片(双)</title>
-    <style>
-        /* ====================================== */
-        /* 全局基础样式：所有元素统一设置 */
-        /* ====================================== */
-        * {
-            margin: 0; /* 清除所有元素默认外边距 */
-            padding: 0; /* 清除所有元素默认内边距 */
-            box-sizing: border-box; /* 宽高包含边框+内边距，布局不乱 */
-            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif; /* 全局统一字体 */
-        }
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<title>杰佣留言卡片(双)</title>
+		<style>
+			/* ====================================== */
+			/* 全局基础样式：所有元素统一设置 */
+			/* ====================================== */
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+				font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
+			}
 
-        body {
-            background-color: #f5f5f5; /* 页面整体背景：浅灰色 */
-            padding: 15px; /* 页面四周内边距：15px */
-        }
+			body {
+				background-color: #f5f5f5;
+				padding: 15px;
+			}
 
-        /* ====================================== */
-        /* 滑动编辑器外层容器：负责包裹左右滑动区域 */
-        /* ====================================== */
-        .editor-wrap {
-            width: 100%; /* 宽度占满屏幕 */
-            overflow: hidden; /* 隐藏超出部分，实现滑动效果 */
-            border-radius: 12px; /* 圆角：12px */
-            margin-bottom: 15px; /* 下方外边距：15px */
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05); /* 轻微阴影，提升质感 */
-            position: relative; /* 定位基础，配合滑动使用 */
-        }
+			.editor-wrap {
+				width: 100%;
+				overflow: hidden;
+				border-radius: 12px;
+				margin-bottom: 15px;
+				box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+				position: relative;
+			}
 
-        /* 滑动轨道：承载两个编辑卡片，实现左右滑动 */
-        .editor-slider {
-            display: flex; /* 横向排列两个编辑页 */
-            transition: transform 0.3s ease; /* 滑动动画：0.3秒平滑过渡 */
-        }
+			.editor-slider {
+				display: flex;
+				transition: transform 0.3s ease;
+			}
 
-        /* 单个编辑页样式：卡片1 / 卡片2 共用 */
-        .editor {
-            width: 100%; /* 每个编辑页占满屏幕宽度 */
-            flex-shrink: 0; /* 禁止压缩，保证滑动布局正常 */
-            background: #fff; /* 背景白色 */
-            padding: 15px; /* 内边距15px */
-            padding-bottom: 50px; /* 给底部导航留出空间 */
-            position: relative; /* 让导航条相对于卡片定位 */
-        }
+			.editor {
+				width: 100%;
+				flex-shrink: 0;
+				background: #fff;
+				padding: 15px;
+				position: relative;
+			}
 
-        /* 卡片底部导航指示条（只在卡片内部底部） */
-        .page-indicator {
-            position: absolute;
-            bottom: 18px;
-            left: 0;
-            right: 0;
-            margin: auto;
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-            height: 6px;
-        }
+			.page-indicator {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				gap: 4px;
+				width: 100%;
+				/* 去掉max-width，让它和父容器一样宽，也就是和输入框同宽 */
+				margin-left: 0;
+				margin-right: 0;
+				margin-top: 10px;
+			}
 
-        /* 导航小条样式 */
-        .page-indicator .bar {
-            width: 22px;
-            height: 6px;
-            border-radius: 3px;
-            background: transparent;
-            border: 1px solid #ccc;
-            transition: all 0.3s ease;
-        }
+			.page-indicator .bar {
+				flex: 1; /* 两个条平分容器宽度，自动占满 */
+				height: 5px;
+				border-radius: 3px;
+				background: transparent;
+				border: 1px solid #ccc;
+				transition: all 0.3s ease;
+			}
 
-        /* 激活时变成实心灰色 */
-        .page-indicator .bar.active {
-            background: #ccc;
-        }
+			.page-indicator .bar.active {
+				background: #ccc;
+			}
 
-        /* 编辑页标题：卡片1 / 卡片2 */
-        .editor h3 {
-            font-size: 18px; /* 文字大小18px */
-            margin-bottom: 12px; /* 下方间距12px */
-            color: #333; /* 深灰色文字 */
-            text-align: center; /* 文字居中 */
-        }
+			.editor h3 {
+				font-size: 18px;
+				margin-bottom: 12px;
+				color: #333;
+				text-align: center;
+			}
 
-        /* 编辑表单项：每个输入框分组 */
-        .editor-item {
-            margin-bottom: 10px; /* 每项之间间距10px */
-        }
+			.editor-item {
+				margin-bottom: 10px;
+			}
 
-        /* 编辑项标签：名字、留言、来源等文字 */
-        .editor-item label {
-            display: block; /* 独占一行 */
-            font-size: 14px; /* 文字大小14px */
-            color: #666; /* 灰色文字 */
-            margin-bottom: 4px; /* 下方间距4px */
-        }
+			.editor-item label {
+				display: block;
+				font-size: 14px;
+				color: #666;
+				margin-bottom: 4px;
+			}
 
-        /* 头像上传区域：按钮 + 小头像 */
-        .avatar-upload {
-            display: flex; /* 横向排列 */
-            align-items: center; /* 垂直居中 */
-            gap: 10px; /* 元素间距10px */
-        }
+			.avatar-upload {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+			}
 
-        /* 隐藏原生文件选择框 */
-        #avatarInput1, #avatarInput2 {
-            display: none;
-        }
+			#avatarInput1,
+			#avatarInput2 {
+				display: none;
+			}
 
-        /* 上传图片按钮样式 */
-        .upload-btn {
-            background: #999; /* 灰色背景 */
-            color: #fff; /* 白色文字 */
-            padding: 6px 12px; /* 内边距 */
-            border-radius: 8px; /* 圆角8px */
-            font-size: 14px; /* 文字大小 */
-            cursor: pointer; /* 鼠标变小手 */
-            border: none; /* 去掉默认边框 */
-        }
+			.upload-btn {
+				background: #999;
+				color: #fff;
+				padding: 6px 12px;
+				border-radius: 8px;
+				font-size: 14px;
+				cursor: pointer;
+				border: none;
+			}
 
-        /* 编辑区内小头像预览 */
-        .preview-avatar-small {
-            width: 40px; /* 宽度40px */
-            height: 40px; /* 高度40px */
-            border-radius: 50%; /* 正圆形 */
-            background: #eee; /* 默认浅灰背景 */
-            object-fit: cover; /* 图片不变形填满 */
-        }
+			.preview-avatar-small {
+				width: 40px;
+				height: 40px;
+				border-radius: 50%;
+				background: #eee;
+				object-fit: cover;
+			}
 
-        /* 输入框 + 文本域通用样式 */
-        .editor-item input,
-        .editor-item textarea {
-            width: 100%; /* 宽度占满 */
-            padding: 8px 12px; /* 内边距 */
-            border: 1px solid #ddd; /* 浅灰色边框 */
-            border-radius: 8px; /* 圆角8px */
-            font-size: 14px; /* 文字大小 */
-            outline: none; /* 去掉点击高亮框 */
-        }
+			.editor-item input,
+			.editor-item textarea {
+				width: 100%;
+				padding: 8px 12px;
+				border: 1px solid #ddd;
+				border-radius: 8px;
+				font-size: 14px;
+				outline: none;
+			}
 
-        /* 输入框获得焦点时：边框变蓝 */
-        .editor-item input:focus,
-        .editor-item textarea:focus {
-            border-color: #0088ff;
-        }
+			.editor-item input:focus,
+			.editor-item textarea:focus {
+				border-color: #0088ff;
+			}
 
-        /* ====================================== */
-        /* 预览卡片样式：最终展示的留言卡片 */
-        /* ====================================== */
-        .preview {
-            background: #fff; /* 白色背景 */
-            padding: 20px; /* 内边距20px */
-            border-radius: 12px; /* 圆角12px */
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05); /* 阴影 */
-            margin-bottom: 15px; /* 下方间距15px */
-        }
+			.preview {
+				background: #fff;
+				padding: 20px;
+				border-radius: 12px;
+				box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+				margin-bottom: 15px;
+			}
 
-        /* 卡片内部布局：头像 + 内容 横向排列 */
-        .message-card {
-            display: flex; /* 弹性布局 */
-            align-items: flex-start; /* 顶部对齐 */
-            gap: 12px; /* 头像与内容间距12px */
-        }
+			.message-card {
+				display: flex;
+				align-items: flex-start;
+				gap: 12px;
+			}
 
-        /* 预览区大头像 */
-        .avatar {
-            width: 60px; /* 宽度60px */
-            height: 60px; /* 高度60px */
-            border-radius: 50%; /* 正圆形 */
-            object-fit: cover; /* 图片填充不变形 */
-            background: #eee; /* 默认背景 */
-        }
+			.avatar {
+				width: 60px;
+				height: 60px;
+				border-radius: 50%;
+				object-fit: cover;
+				background: #eee;
+			}
 
-        /* 卡片内容区域 */
-        .content {
-            flex: 1; /* 自动占满剩余宽度 */
-        }
+			.content {
+				flex: 1;
+			}
 
-        /* 卡片名字样式 */
-        .name {
-            font-size: 18px; /* 文字大小18px */
-            font-weight: bold; /* 加粗 */
-            color: #333; /* 深灰色 */
-            margin-bottom: 6px; /* 下方间距6px */
-        }
+			.name {
+				font-size: 18px;
+				font-weight: bold;
+				color: #333;
+				margin-bottom: 6px;
+			}
 
-        /* 卡片留言文字 */
-        .text {
-            font-size: 16px; /* 文字大小16px */
-            color: #333; /* 深灰色 */
-            line-height: 1.4; /* 行高，文字更舒服 */
-            margin-bottom: 10px; /* 下方间距10px */
-        }
+			.text {
+				font-size: 16px;
+				color: #333;
+				line-height: 1.4;
+				margin-bottom: 10px;
+			}
 
-        /* 卡片底部栏：来源 + 时间 + 点赞 */
-        .footer {
-            display: flex; /* 横向排列 */
-            justify-content: space-between; /* 自动分散对齐 */
-            align-items: center; /* 垂直居中 */
-            width: 100%; /* 宽度占满 */
-            font-size: 14px; /* 文字大小14px */
-            color: #999; /* 浅灰色文字 */
-        }
+			.footer {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				width: 100%;
+				font-size: 14px;
+				color: #999;
+			}
 
-        /* ====================================== */
-        /* 小屏幕手机适配：宽度小于375px时生效 */
-        /* ====================================== */
-        @media (max-width: 375px) {
-            .avatar { width: 50px; height: 50px; } /* 缩小头像 */
-            .name { font-size: 16px; } /* 缩小名字 */
-            .text { font-size: 14px; } /* 缩小留言 */
-            .footer { font-size: 12px; } /* 缩小底部文字 */
-        }
+			@media (max-width: 375px) {
+				.avatar {
+					width: 50px;
+					height: 50px;
+				}
 
-        /* ====================================== */
-        /* 滑动提示文字：卡片1左滑→卡片2 */
-        /* ====================================== */
-        .hint {
-            text-align: center; /* 居中 */
-            font-size: 12px; /* 小号文字 */
-            color: #999; /* 浅灰色 */
-            margin-bottom: 10px; /* 下方间距 */
-        }
-    </style>
-</head>
-<body>
+				.name {
+					font-size: 16px;
+				}
 
-    <div class="hint">卡片1左滑→卡片2｜卡片2右滑→卡片1</div>
+				.text {
+					font-size: 14px;
+				}
 
-    <!-- 滑动编辑器容器 -->
-    <div class="editor-wrap" id="editorWrap">
-        <div class="editor-slider" id="editorSlider">
-            <!-- 编辑页1：卡片1 -->
-            <div class="editor">
-                <h3>卡片1</h3>
-                <div class="editor-item">
-                    <label>头像：</label>
-                    <div class="avatar-upload">
-                        <button class="upload-btn" onclick="document.getElementById('avatarInput1').click()">选择图片</button>
-                        <img class="preview-avatar-small" id="smallAvatar1" src="校园杰克.jpg">
-                        <input type="file" id="avatarInput1" accept="image/*" onchange="previewAvatar(1, this)">
-                    </div>
-                </div>
-                <div class="editor-item">
-                    <label>名字：</label>
-                    <input type="text" id="userName1" value="杰克" oninput="updateCard1()">
-                </div>
-                <div class="editor-item">
-                    <label>留言：</label>
-                    <textarea id="messageText1" rows="2" oninput="updateCard1()">“@奈布：学长，等你下课一起走好吗？”</textarea>
-                </div>
-                <div class="editor-item">
-                    <label>来源：</label>
-                    <input type="text" id="sourceText1" value="来自杰克的留言" oninput="updateCard1()">
-                </div>
-                <div class="editor-item">
-                    <label>时间：</label>
-                    <input type="text" id="timeText1" value="5:20pm" oninput="updateCard1()">
-                </div>
-                <div class="editor-item">
-                    <label>点赞数：</label>
-                    <input type="text" id="likeNum1" value="1314" oninput="updateCard1()">
-                </div>
+				.footer {
+					font-size: 12px;
+				}
+			}
 
-                <!-- 卡片底部导航栏（只在这里！） -->
-                <div class="page-indicator">
-                    <div class="bar active" id="bar1"></div>
-                    <div class="bar" id="bar2"></div>
-                </div>
-            </div>
+			.hint {
+				text-align: center;
+				font-size: 12px;
+				color: #999;
+				margin-bottom: 10px;
+			}
+		</style>
+	</head>
+	<body>
 
-            <!-- 编辑页2：卡片2 -->
-            <div class="editor">
-                <h3>卡片2</h3>
-                <div class="editor-item">
-                    <label>头像：</label>
-                    <div class="avatar-upload">
-                        <button class="upload-btn" onclick="document.getElementById('avatarInput2').click()">选择图片</button>
-                        <img class="preview-avatar-small" id="smallAvatar2" src="校园奈布.jpg">
-                        <input type="file" id="avatarInput2" accept="image/*" onchange="previewAvatar(2, this)">
-                    </div>
-                </div>
-                <div class="editor-item">
-                    <label>名字：</label>
-                    <input type="text" id="userName2" value="奈布" oninput="updateCard2()">
-                </div>
-                <div class="editor-item">
-                    <label>留言：</label>
-                    <textarea id="messageText2" rows="2" oninput="updateCard2()">“@杰克 约架？”</textarea>
-                </div>
-                <div class="editor-item">
-                    <label>来源：</label>
-                    <input type="text" id="sourceText2" value="来自奈布的留言" oninput="updateCard2()">
-                </div>
-                <div class="editor-item">
-                    <label>时间：</label>
-                    <input type="text" id="timeText2" value="5:21pm" oninput="updateCard2()">
-                </div>
-                <div class="editor-item">
-                    <label>点赞数：</label>
-                    <input type="text" id="likeNum2" value="520" oninput="updateCard2()">
-                </div>
+		<div class="hint">卡片1左滑→卡片2｜卡片2右滑→卡片1</div>
 
-                <!-- 卡片底部导航栏（只在这里！） -->
-                <div class="page-indicator">
-                    <div class="bar active" id="bar1-2"></div>
-                    <div class="bar" id="bar2-2"></div>
-                </div>
-            </div>
-        </div>
-    </div>
+		<div class="editor-wrap" id="editorWrap">
+			<div class="editor-slider" id="editorSlider">
+				<div class="editor">
+					<h3>卡片1</h3>
+					<div class="editor-item">
+						<label>头像：</label>
+						<div class="avatar-upload">
+							<button class="upload-btn"
+								onclick="document.getElementById('avatarInput1').click()">选择图片</button>
+							<img class="preview-avatar-small" id="smallAvatar1" src="校园杰克.jpg">
+							<input type="file" id="avatarInput1" accept="image/*" onchange="previewAvatar(1, this)">
+						</div>
+					</div>
+					<div class="editor-item">
+						<label>名字：</label>
+						<input type="text" id="userName1" value="杰克" oninput="updateCard1()">
+					</div>
+					<div class="editor-item">
+						<label>留言：</label>
+						<textarea id="messageText1" rows="2" oninput="updateCard1()">“@奈布：学长，等你下课一起走好吗？”</textarea>
+					</div>
+					<div class="editor-item">
+						<label>来源：</label>
+						<input type="text" id="sourceText1" value="来自杰克的留言" oninput="updateCard1()">
+					</div>
+					<div class="editor-item">
+						<label>时间：</label>
+						<input type="text" id="timeText1" value="5:20pm" oninput="updateCard1()">
+					</div>
+					<div class="editor-item">
+						<label>点赞数：</label>
+						<input type="text" id="likeNum1" value="1314" oninput="updateCard1()">
+					</div>
 
-    <!-- 预览：卡片1 -->
-    <div class="preview">
-        <div class="message-card">
-            <img class="avatar" id="previewAvatar1" src="校园杰克.jpg">
-            <div class="content">
-                <div class="name" id="previewName1">杰克</div>
-                <div class="text" id="previewText1">“@奈布：学长，等你下课一起走好吗？”</div>
-                <div class="footer">
-                    <span id="previewSource1">来自杰克的留言</span>
-                    <span id="previewTime1">5:20pm</span>
-                    <span id="previewLike1">点赞1314</span>
-                </div>
-            </div>
-        </div>
-    </div>
+					<div class="page-indicator">
+						<div class="bar active" id="bar1"></div>
+						<div class="bar" id="bar2"></div>
+					</div>
+				</div>
 
-    <!-- 预览：卡片2 -->
-    <div class="preview">
-        <div class="message-card">
-            <img class="avatar" id="previewAvatar2" src="校园奈布.jpg">
-            <div class="content">
-                <div class="name" id="previewName2">奈布</div>
-                <div class="text" id="previewText2">“@杰克 约架？”</div>
-                <div class="footer">
-                    <span id="previewSource2">来自奈布的留言</span>
-                    <span id="previewTime2">5:21pm</span>
-                    <span id="previewLike2">点赞520</span>
-                </div>
-            </div>
-        </div>
-    </div>
+				<div class="editor">
+					<h3>卡片2</h3>
+					<div class="editor-item">
+						<label>头像：</label>
+						<div class="avatar-upload">
+							<button class="upload-btn"
+								onclick="document.getElementById('avatarInput2').click()">选择图片</button>
+							<img class="preview-avatar-small" id="smallAvatar2" src="校园奈布.jpg">
+							<input type="file" id="avatarInput2" accept="image/*" onchange="previewAvatar(2, this)">
+						</div>
+					</div>
+					<div class="editor-item">
+						<label>名字：</label>
+						<input type="text" id="userName2" value="奈布" oninput="updateCard2()">
+					</div>
+					<div class="editor-item">
+						<label>留言：</label>
+						<textarea id="messageText2" rows="2" oninput="updateCard2()">“@杰克 约架？”</textarea>
+					</div>
+					<div class="editor-item">
+						<label>来源：</label>
+						<input type="text" id="sourceText2" value="来自奈布的留言" oninput="updateCard2()">
+					</div>
+					<div class="editor-item">
+						<label>时间：</label>
+						<input type="text" id="timeText2" value="5:21pm" oninput="updateCard2()">
+					</div>
+					<div class="editor-item">
+						<label>点赞数：</label>
+						<input type="text" id="likeNum2" value="520" oninput="updateCard2()">
+					</div>
 
-<script>
-    // ========== 滑动逻辑 ==========
-    const slider = document.getElementById('editorSlider');
-    let startX = 0, moving = false, currentPage = 0;
+					<div class="page-indicator">
+						<div class="bar active" id="bar1-2"></div>
+						<div class="bar" id="bar2-2"></div>
+					</div>
+				</div>
+			</div>
+		</div>
 
-    // 获取两个页面的导航条
-    const bar1 = document.getElementById('bar1');
-    const bar2 = document.getElementById('bar2');
-    const bar1_2 = document.getElementById('bar1-2');
-    const bar2_2 = document.getElementById('bar2-2');
+		<div class="preview">
+			<div class="message-card">
+				<img class="avatar" id="previewAvatar1" src="校园杰克.jpg">
+				<div class="content">
+					<div class="name" id="previewName1">杰克</div>
+					<div class="text" id="previewText1">“@奈布：学长，等你下课一起走好吗？”</div>
+					<div class="footer">
+						<span id="previewSource1">来自杰克的留言</span>
+						<span id="previewTime1">5:20pm</span>
+						<span id="previewLike1">点赞1314</span>
+					</div>
+				</div>
+			</div>
+		</div>
 
-    // 更新导航条状态
-    function updateIndicator() {
-        if (currentPage === 0) {
-            bar1.classList.add('active');
-            bar2.classList.remove('active');
-            bar1_2.classList.add('active');
-            bar2_2.classList.remove('active');
-        } else {
-            bar1.classList.remove('active');
-            bar2.classList.add('active');
-            bar1_2.classList.remove('active');
-            bar2_2.classList.add('active');
-        }
-    }
+		<div class="preview">
+			<div class="message-card">
+				<img class="avatar" id="previewAvatar2" src="校园奈布.jpg">
+				<div class="content">
+					<div class="name" id="previewName2">奈布</div>
+					<div class="text" id="previewText2">“@杰克 约架？”</div>
+					<div class="footer">
+						<span id="previewSource2">来自奈布的留言</span>
+						<span id="previewTime2">5:21pm</span>
+						<span id="previewLike2">点赞520</span>
+					</div>
+				</div>
+			</div>
+		</div>
 
-    // 触摸开始
-    document.getElementById('editorWrap').addEventListener('touchstart', e => {
-        startX = e.touches[0].clientX;
-    });
+		<script>
+			const slider = document.getElementById('editorSlider');
+			let startX = 0,
+				moving = false,
+				currentPage = 0;
 
-    // 触摸跟随拖动
-    document.getElementById('editorWrap').addEventListener('touchmove', e => {
-        moving = true;
-        const dx = e.touches[0].clientX - startX;
-        slider.style.transform = `translateX(${-currentPage * 100 + dx / document.body.clientWidth * 100}%)`;
-    });
+			const bar1 = document.getElementById('bar1');
+			const bar2 = document.getElementById('bar2');
+			const bar1_2 = document.getElementById('bar1-2');
+			const bar2_2 = document.getElementById('bar2-2');
 
-    // 滑动结束判断
-    document.getElementById('editorWrap').addEventListener('touchend', e => {
-        if (!moving) return;
-        moving = false;
-        const dx = e.changedTouches[0].clientX - startX;
+			function updateIndicator() {
+				if (currentPage === 0) {
+					bar1.classList.add('active');
+					bar2.classList.remove('active');
+					bar1_2.classList.add('active');
+					bar2_2.classList.remove('active');
+				} else {
+					bar1.classList.remove('active');
+					bar2.classList.add('active');
+					bar1_2.classList.remove('active');
+					bar2_2.classList.add('active');
+				}
+			}
 
-        if (currentPage === 0 && dx < -50) {
-            currentPage = 1;
-        } else if (currentPage === 1 && dx > 50) {
-            currentPage = 0;
-        }
+			document.getElementById('editorWrap').addEventListener('touchstart', e => {
+				startX = e.touches[0].clientX;
+			});
 
-        slider.style.transform = `translateX(${-currentPage * 100}%)`;
-        updateIndicator();
-    });
+			document.getElementById('editorWrap').addEventListener('touchmove', e => {
+				moving = true;
+				const dx = e.touches[0].clientX - startX;
+				slider.style.transform = `translateX(${-currentPage * 100 + dx / document.body.clientWidth * 100}%)`;
+			});
 
-    // 电脑鼠标拖拽兼容
-    document.getElementById('editorWrap').addEventListener('mousedown', e => {
-        startX = e.clientX;
-        moving = true;
-    });
-    document.addEventListener('mousemove', e => {
-        if (!moving) return;
-        const dx = e.clientX - startX;
-        slider.style.transform = `translateX(${-currentPage * 100 + dx / document.body.clientWidth * 100}%)`;
-    });
-    document.addEventListener('mouseup', e => {
-        if (!moving) return;
-        moving = false;
-        const dx = e.clientX - startX;
-        if (currentPage === 0 && dx < -50) currentPage = 1;
-        else if (currentPage === 1 && dx > 50) currentPage = 0;
-        slider.style.transform = `translateX(${-currentPage * 100}%)`;
-        updateIndicator();
-    });
+			document.getElementById('editorWrap').addEventListener('touchend', e => {
+				if (!moving) return;
+				moving = false;
+				const dx = e.changedTouches[0].clientX - startX;
 
-    // ========== 卡片编辑更新逻辑 ==========
-    function previewAvatar(cardNum, input) {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = e => {
-                document.getElementById('smallAvatar' + cardNum).src = e.target.result;
-                document.getElementById('previewAvatar' + cardNum).src = e.target.result;
-            };
-            reader.readAsDataURL(input.files[0]);
-        }
-    }
+				if (currentPage === 0 && dx < -50) {
+					currentPage = 1;
+				} else if (currentPage === 1 && dx > 50) {
+					currentPage = 0;
+				}
 
-    function updateCard1() {
-        document.getElementById('previewName1').textContent = document.getElementById('userName1').value || '未知用户';
-        document.getElementById('previewText1').textContent = document.getElementById('messageText1').value || '请输入内容';
-        document.getElementById('previewSource1').textContent = document.getElementById('sourceText1').value || '来源';
-        document.getElementById('previewTime1').textContent = document.getElementById('timeText1').value || '时间';
-        document.getElementById('previewLike1').textContent = '点赞' + (document.getElementById('likeNum1').value || '0');
-    }
+				slider.style.transform = `translateX(${-currentPage * 100}%)`;
+				updateIndicator();
+			});
 
-    function updateCard2() {
-        document.getElementById('previewName2').textContent = document.getElementById('userName2').value || '未知用户';
-        document.getElementById('previewText2').textContent = document.getElementById('messageText2').value || '请输入内容';
-        document.getElementById('previewSource2').textContent = document.getElementById('sourceText2').value || '来源';
-        document.getElementById('previewTime2').textContent = document.getElementById('timeText2').value || '时间';
-        document.getElementById('previewLike2').textContent = '点赞' + (document.getElementById('likeNum2').value || '0');
-    }
-</script>
+			document.getElementById('editorWrap').addEventListener('mousedown', e => {
+				startX = e.clientX;
+				moving = true;
+			});
 
-</body>
+			document.addEventListener('mousemove', e => {
+				if (!moving) return;
+				const dx = e.clientX - startX;
+				slider.style.transform = `translateX(${-currentPage * 100 + dx / document.body.clientWidth * 100}%)`;
+			});
+
+			document.addEventListener('mouseup', e => {
+				if (!moving) return;
+				moving = false;
+				const dx = e.clientX - startX;
+				if (currentPage === 0 && dx < -50) currentPage = 1;
+				else if (currentPage === 1 && dx > 50) currentPage = 0;
+				slider.style.transform = `translateX(${-currentPage * 100}%)`;
+				updateIndicator();
+			});
+
+			function previewAvatar(cardNum, input) {
+				if (input.files && input.files[0]) {
+					const reader = new FileReader();
+					reader.onload = e => {
+						document.getElementById('smallAvatar' + cardNum).src = e.target.result;
+						document.getElementById('previewAvatar' + cardNum).src = e.target.result;
+					};
+					reader.readAsDataURL(input.files[0]);
+				}
+			}
+
+			function updateCard1() {
+				document.getElementById('previewName1').textContent = document.getElementById('userName1').value || '未知用户';
+				document.getElementById('previewText1').textContent = document.getElementById('messageText1').value || '请输入内容';
+				document.getElementById('previewSource1').textContent = document.getElementById('sourceText1').value || '来源';
+				document.getElementById('previewTime1').textContent = document.getElementById('timeText1').value || '时间';
+				document.getElementById('previewLike1').textContent = '点赞' + (document.getElementById('likeNum1').value || '0');
+			}
+
+			function updateCard2() {
+				document.getElementById('previewName2').textContent = document.getElementById('userName2').value || '未知用户';
+				document.getElementById('previewText2').textContent = document.getElementById('messageText2').value || '请输入内容';
+				document.getElementById('previewSource2').textContent = document.getElementById('sourceText2').value || '来源';
+				document.getElementById('previewTime2').textContent = document.getElementById('timeText2').value || '时间';
+				document.getElementById('previewLike2').textContent = '点赞' + (document.getElementById('likeNum2').value || '0');
+			}
+		</script>
+
+	</body>
 </html>
