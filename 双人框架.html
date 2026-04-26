@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>杰佣留言卡片(双)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
+        }
+        body {
+            background-color: #f5f5f5;
+            padding: 15px;
+        }
+
+        /* 编辑器滑动容器 */
+        .editor-wrap {
+            width: 100%;
+            overflow: hidden;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            position: relative;
+        }
+        .editor-slider {
+            display: flex;
+            transition: transform 0.3s ease;
+        }
+        .editor {
+            width: 100%;
+            flex-shrink: 0;
+            background: #fff;
+            padding: 15px;
+        }
+        .editor h3 {
+            font-size: 18px;
+            margin-bottom: 12px;
+            color: #333;
+            text-align: center;
+        }
+        .editor-item {
+            margin-bottom: 10px;
+        }
+        .editor-item label {
+            display: block;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+        .avatar-upload {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        #avatarInput1, #avatarInput2 {
+            display: none;
+        }
+        .upload-btn {
+            background: #999;
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+        }
+        .preview-avatar-small {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #eee;
+            object-fit: cover;
+        }
+        .editor-item input,
+        .editor-item textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+        }
+        .editor-item input:focus,
+        .editor-item textarea:focus {
+            border-color: #0088ff;
+        }
+
+        /* 预览卡片 */
+        .preview {
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 15px;
+        }
+        .message-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        .avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #eee;
+        }
+        .content {
+            flex: 1;
+        }
+        .name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 6px;
+        }
+        .text {
+            font-size: 16px;
+            color: #333;
+            line-height: 1.4;
+            margin-bottom: 10px;
+        }
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            font-size: 14px;
+            color: #999;
+        }
+
+        /* 小屏适配 */
+        @media (max-width: 375px) {
+            .avatar { width: 50px; height: 50px; }
+            .name { font-size: 16px; }
+            .text { font-size: 14px; }
+            .footer { font-size: 12px; }
+        }
+
+        /* 滑动提示 */
+        .hint {
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="hint">卡片1左滑→卡片2｜卡片2右滑→卡片1</div>
+
+    <!-- 滑动编辑器容器 -->
+    <div class="editor-wrap" id="editorWrap">
+        <div class="editor-slider" id="editorSlider">
+            <!-- 编辑页1：卡片1 -->
+            <div class="editor">
+                <h3>卡片1</h3>
+                <div class="editor-item">
+                    <label>头像：</label>
+                    <div class="avatar-upload">
+                        <button class="upload-btn" onclick="document.getElementById('avatarInput1').click()">选择图片</button>
+                        <img class="preview-avatar-small" id="smallAvatar1" src="校园杰克.jpg">
+                        <input type="file" id="avatarInput1" accept="image/*" onchange="previewAvatar(1, this)">
+                    </div>
+                </div>
+                <div class="editor-item">
+                    <label>名字：</label>
+                    <input type="text" id="userName1" value="杰克" oninput="updateCard1()">
+                </div>
+                <div class="editor-item">
+                    <label>留言：</label>
+                    <textarea id="messageText1" rows="2" oninput="updateCard1()">“@奈布：学长，等你下课一起走好吗？”</textarea>
+                </div>
+                <div class="editor-item">
+                    <label>来源：</label>
+                    <input type="text" id="sourceText1" value="来自杰克的留言" oninput="updateCard1()">
+                </div>
+                <div class="editor-item">
+                    <label>时间：</label>
+                    <input type="text" id="timeText1" value="5:20pm" oninput="updateCard1()">
+                </div>
+                <div class="editor-item">
+                    <label>点赞数：</label>
+                    <input type="text" id="likeNum1" value="1314" oninput="updateCard1()">
+                </div>
+            </div>
+
+            <!-- 编辑页2：卡片2 -->
+            <div class="editor">
+                <h3>卡片2</h3>
+                <div class="editor-item">
+                    <label>头像：</label>
+                    <div class="avatar-upload">
+                        <button class="upload-btn" onclick="document.getElementById('avatarInput2').click()">选择图片</button>
+                        <img class="preview-avatar-small" id="smallAvatar2" src="校园奈布.jpg">
+                        <input type="file" id="avatarInput2" accept="image/*" onchange="previewAvatar(2, this)">
+                    </div>
+                </div>
+                <div class="editor-item">
+                    <label>名字：</label>
+                    <input type="text" id="userName2" value="奈布" oninput="updateCard2()">
+                </div>
+                <div class="editor-item">
+                    <label>留言：</label>
+                    <textarea id="messageText2" rows="2" oninput="updateCard2()">“@杰克 约架？”</textarea>
+                </div>
+                <div class="editor-item">
+                    <label>来源：</label>
+                    <input type="text" id="sourceText2" value="来自奈布的留言" oninput="updateCard2()">
+                </div>
+                <div class="editor-item">
+                    <label>时间：</label>
+                    <input type="text" id="timeText2" value="5:21pm" oninput="updateCard2()">
+                </div>
+                <div class="editor-item">
+                    <label>点赞数：</label>
+                    <input type="text" id="likeNum2" value="520" oninput="updateCard2()">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 预览：卡片1 -->
+    <div class="preview">
+        <div class="message-card">
+            <img class="avatar" id="previewAvatar1" src="校园杰克.jpg">
+            <div class="content">
+                <div class="name" id="previewName1">杰克</div>
+                <div class="text" id="previewText1">“@奈布：学长，等你下课一起走好吗？”</div>
+                <div class="footer">
+                    <span id="previewSource1">来自杰克的留言</span>
+                    <span id="previewTime1">5:20pm</span>
+                    <span id="previewLike1">点赞1314</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 预览：卡片2 -->
+    <div class="preview">
+        <div class="message-card">
+            <img class="avatar" id="previewAvatar2" src="校园奈布.jpg">
+            <div class="content">
+                <div class="name" id="previewName2">奈布</div>
+                <div class="text" id="previewText2">“@杰克 约架？”</div>
+                <div class="footer">
+                    <span id="previewSource2">来自奈布的留言</span>
+                    <span id="previewTime2">5:21pm</span>
+                    <span id="previewLike2">点赞520</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    // ========== 修正后滑动逻辑 ==========
+    const slider = document.getElementById('editorSlider');
+    let startX = 0, moving = false, currentPage = 0;
+
+    // 触摸开始
+    document.getElementById('editorWrap').addEventListener('touchstart', e => {
+        startX = e.touches[0].clientX;
+    });
+
+    // 触摸跟随拖动
+    document.getElementById('editorWrap').addEventListener('touchmove', e => {
+        moving = true;
+        const dx = e.touches[0].clientX - startX;
+        slider.style.transform = `translateX(${-currentPage * 100 + dx / document.body.clientWidth * 100}%)`;
+    });
+
+    // 滑动结束判断
+    document.getElementById('editorWrap').addEventListener('touchend', e => {
+        if (!moving) return;
+        moving = false;
+        const dx = e.changedTouches[0].clientX - startX;
+
+        // 核心规则：
+        // 1. 卡片1(currentPage=0) 【左滑】(dx<0) → 切卡片2
+        // 2. 卡片2(currentPage=1) 【右滑】(dx>0) → 切卡片1
+        if (currentPage === 0 && dx < -50) {
+            currentPage = 1;
+        } else if (currentPage === 1 && dx > 50) {
+            currentPage = 0;
+        }
+
+        slider.style.transform = `translateX(${-currentPage * 100}%)`;
+    });
+
+    // 电脑鼠标拖拽兼容
+    document.getElementById('editorWrap').addEventListener('mousedown', e => {
+        startX = e.clientX;
+        moving = true;
+    });
+    document.addEventListener('mousemove', e => {
+        if (!moving) return;
+        const dx = e.clientX - startX;
+        slider.style.transform = `translateX(${-currentPage * 100 + dx / document.body.clientWidth * 100}%)`;
+    });
+    document.addEventListener('mouseup', e => {
+        if (!moving) return;
+        moving = false;
+        const dx = e.clientX - startX;
+        if (currentPage === 0 && dx < -50) {
+            currentPage = 1;
+        } else if (currentPage === 1 && dx > 50) {
+            currentPage = 0;
+        }
+        slider.style.transform = `translateX(${-currentPage * 100}%)`;
+    });
+
+    // ========== 卡片编辑更新逻辑 ==========
+    function previewAvatar(cardNum, input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                document.getElementById('smallAvatar' + cardNum).src = e.target.result;
+                document.getElementById('previewAvatar' + cardNum).src = e.target.result;
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function updateCard1() {
+        document.getElementById('previewName1').textContent = document.getElementById('userName1').value || '未知用户';
+        document.getElementById('previewText1').textContent = document.getElementById('messageText1').value || '请输入内容';
+        document.getElementById('previewSource1').textContent = document.getElementById('sourceText1').value || '来源';
+        document.getElementById('previewTime1').textContent = document.getElementById('timeText1').value || '时间';
+        document.getElementById('previewLike1').textContent = '点赞' + (document.getElementById('likeNum1').value || '0');
+    }
+
+    function updateCard2() {
+        document.getElementById('previewName2').textContent = document.getElementById('userName2').value || '未知用户';
+        document.getElementById('previewText2').textContent = document.getElementById('messageText2').value || '请输入内容';
+        document.getElementById('previewSource2').textContent = document.getElementById('sourceText2').value || '来源';
+        document.getElementById('previewTime2').textContent = document.getElementById('timeText2').value || '时间';
+        document.getElementById('previewLike2').textContent = '点赞' + (document.getElementById('likeNum2').value || '0');
+    }
+</script>
+
+</body>
+</html>
