@@ -31,36 +31,6 @@
             margin-bottom: 15px; /* 下方外边距：15px */
             box-shadow: 0 2px 8px rgba(0,0,0,0.05); /* 轻微阴影，提升质感 */
             position: relative; /* 定位基础，配合滑动使用 */
-            padding-bottom: 36px; /* 给底部导航条留出空间 */
-        }
-
-        /* 底部导航指示条容器 */
-        .page-indicator {
-            position: absolute;
-            bottom: 12px;
-            left: 0;
-            right: 0;
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-            height: 6px;
-            z-index: 10;
-        }
-
-        /* 单个指示点样式 */
-        .page-indicator .dot {
-            width: 24px;
-            height: 6px;
-            border-radius: 3px;
-            background: transparent;
-            border: 1px solid #bbb;
-            transition: all 0.3s ease;
-        }
-
-        /* 激活状态：实心灰色 */
-        .page-indicator .dot.active {
-            background: #bbb;
-            border-color: #bbb;
         }
 
         /* 滑动轨道：承载两个编辑卡片，实现左右滑动 */
@@ -75,6 +45,36 @@
             flex-shrink: 0; /* 禁止压缩，保证滑动布局正常 */
             background: #fff; /* 背景白色 */
             padding: 15px; /* 内边距15px */
+            padding-bottom: 50px; /* 给底部导航留出空间 */
+            position: relative; /* 让导航条相对于卡片定位 */
+        }
+
+        /* 卡片底部导航指示条（只在卡片内部底部） */
+        .page-indicator {
+            position: absolute;
+            bottom: 18px;
+            left: 0;
+            right: 0;
+            margin: auto;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            height: 6px;
+        }
+
+        /* 导航小条样式 */
+        .page-indicator .bar {
+            width: 22px;
+            height: 6px;
+            border-radius: 3px;
+            background: transparent;
+            border: 1px solid #ccc;
+            transition: all 0.3s ease;
+        }
+
+        /* 激活时变成实心灰色 */
+        .page-indicator .bar.active {
+            background: #ccc;
         }
 
         /* 编辑页标题：卡片1 / 卡片2 */
@@ -264,6 +264,12 @@
                     <label>点赞数：</label>
                     <input type="text" id="likeNum1" value="1314" oninput="updateCard1()">
                 </div>
+
+                <!-- 卡片底部导航栏（只在这里！） -->
+                <div class="page-indicator">
+                    <div class="bar active" id="bar1"></div>
+                    <div class="bar" id="bar2"></div>
+                </div>
             </div>
 
             <!-- 编辑页2：卡片2 -->
@@ -297,13 +303,13 @@
                     <label>点赞数：</label>
                     <input type="text" id="likeNum2" value="520" oninput="updateCard2()">
                 </div>
-            </div>
-        </div>
 
-        <!-- 底部导航指示条 -->
-        <div class="page-indicator">
-            <div class="dot active" id="dot1"></div>
-            <div class="dot" id="dot2"></div>
+                <!-- 卡片底部导航栏（只在这里！） -->
+                <div class="page-indicator">
+                    <div class="bar active" id="bar1-2"></div>
+                    <div class="bar" id="bar2-2"></div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -342,18 +348,26 @@
 <script>
     // ========== 滑动逻辑 ==========
     const slider = document.getElementById('editorSlider');
-    const dot1 = document.getElementById('dot1');
-    const dot2 = document.getElementById('dot2');
     let startX = 0, moving = false, currentPage = 0;
 
-    // 更新底部指示条状态
+    // 获取两个页面的导航条
+    const bar1 = document.getElementById('bar1');
+    const bar2 = document.getElementById('bar2');
+    const bar1_2 = document.getElementById('bar1-2');
+    const bar2_2 = document.getElementById('bar2-2');
+
+    // 更新导航条状态
     function updateIndicator() {
         if (currentPage === 0) {
-            dot1.classList.add('active');
-            dot2.classList.remove('active');
+            bar1.classList.add('active');
+            bar2.classList.remove('active');
+            bar1_2.classList.add('active');
+            bar2_2.classList.remove('active');
         } else {
-            dot1.classList.remove('active');
-            dot2.classList.add('active');
+            bar1.classList.remove('active');
+            bar2.classList.add('active');
+            bar1_2.classList.remove('active');
+            bar2_2.classList.add('active');
         }
     }
 
@@ -382,7 +396,7 @@
         }
 
         slider.style.transform = `translateX(${-currentPage * 100}%)`;
-        updateIndicator(); // 切换导航条
+        updateIndicator();
     });
 
     // 电脑鼠标拖拽兼容
@@ -402,7 +416,7 @@
         if (currentPage === 0 && dx < -50) currentPage = 1;
         else if (currentPage === 1 && dx > 50) currentPage = 0;
         slider.style.transform = `translateX(${-currentPage * 100}%)`;
-        updateIndicator(); // 切换导航条
+        updateIndicator();
     });
 
     // ========== 卡片编辑更新逻辑 ==========
