@@ -6,147 +6,193 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <title>杰佣留言卡片(双)</title>
     <style>
+        /* ====================================== */
+        /* 全局基础样式：所有元素统一设置 */
+        /* ====================================== */
         * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
-        }
-        body {
-            background-color: #f5f5f5;
-            padding: 15px;
+            margin: 0; /* 清除所有元素默认外边距 */
+            padding: 0; /* 清除所有元素默认内边距 */
+            box-sizing: border-box; /* 宽高包含边框+内边距，布局不乱 */
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif; /* 全局统一字体 */
         }
 
-        /* 编辑器滑动容器 */
+        body {
+            background-color: #f5f5f5; /* 页面整体背景：浅灰色 */
+            padding: 15px; /* 页面四周内边距：15px */
+        }
+
+        /* ====================================== */
+        /* 滑动编辑器外层容器：负责包裹左右滑动区域 */
+        /* ====================================== */
         .editor-wrap {
-            width: 100%;
-            overflow: hidden;
-            border-radius: 12px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            position: relative;
+            width: 100%; /* 宽度占满屏幕 */
+            overflow: hidden; /* 隐藏超出部分，实现滑动效果 */
+            border-radius: 12px; /* 圆角：12px */
+            margin-bottom: 15px; /* 下方外边距：15px */
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05); /* 轻微阴影，提升质感 */
+            position: relative; /* 定位基础，配合滑动使用 */
         }
+
+        /* 滑动轨道：承载两个编辑卡片，实现左右滑动 */
         .editor-slider {
-            display: flex;
-            transition: transform 0.3s ease;
+            display: flex; /* 横向排列两个编辑页 */
+            transition: transform 0.3s ease; /* 滑动动画：0.3秒平滑过渡 */
         }
+
+        /* 单个编辑页样式：卡片1 / 卡片2 共用 */
         .editor {
-            width: 100%;
-            flex-shrink: 0;
-            background: #fff;
-            padding: 15px;
+            width: 100%; /* 每个编辑页占满屏幕宽度 */
+            flex-shrink: 0; /* 禁止压缩，保证滑动布局正常 */
+            background: #fff; /* 背景白色 */
+            padding: 15px; /* 内边距15px */
         }
+
+        /* 编辑页标题：卡片1 / 卡片2 */
         .editor h3 {
-            font-size: 18px;
-            margin-bottom: 12px;
-            color: #333;
-            text-align: center;
+            font-size: 18px; /* 文字大小18px */
+            margin-bottom: 12px; /* 下方间距12px */
+            color: #333; /* 深灰色文字 */
+            text-align: center; /* 文字居中 */
         }
+
+        /* 编辑表单项：每个输入框分组 */
         .editor-item {
-            margin-bottom: 10px;
+            margin-bottom: 10px; /* 每项之间间距10px */
         }
+
+        /* 编辑项标签：名字、留言、来源等文字 */
         .editor-item label {
-            display: block;
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 4px;
+            display: block; /* 独占一行 */
+            font-size: 14px; /* 文字大小14px */
+            color: #666; /* 灰色文字 */
+            margin-bottom: 4px; /* 下方间距4px */
         }
+
+        /* 头像上传区域：按钮 + 小头像 */
         .avatar-upload {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            display: flex; /* 横向排列 */
+            align-items: center; /* 垂直居中 */
+            gap: 10px; /* 元素间距10px */
         }
+
+        /* 隐藏原生文件选择框 */
         #avatarInput1, #avatarInput2 {
             display: none;
         }
+
+        /* 上传图片按钮样式 */
         .upload-btn {
-            background: #999;
-            color: #fff;
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 14px;
-            cursor: pointer;
-            border: none;
+            background: #999; /* 灰色背景 */
+            color: #fff; /* 白色文字 */
+            padding: 6px 12px; /* 内边距 */
+            border-radius: 8px; /* 圆角8px */
+            font-size: 14px; /* 文字大小 */
+            cursor: pointer; /* 鼠标变小手 */
+            border: none; /* 去掉默认边框 */
         }
+
+        /* 编辑区内小头像预览 */
         .preview-avatar-small {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #eee;
-            object-fit: cover;
+            width: 40px; /* 宽度40px */
+            height: 40px; /* 高度40px */
+            border-radius: 50%; /* 正圆形 */
+            background: #eee; /* 默认浅灰背景 */
+            object-fit: cover; /* 图片不变形填满 */
         }
+
+        /* 输入框 + 文本域通用样式 */
         .editor-item input,
         .editor-item textarea {
-            width: 100%;
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-            outline: none;
+            width: 100%; /* 宽度占满 */
+            padding: 8px 12px; /* 内边距 */
+            border: 1px solid #ddd; /* 浅灰色边框 */
+            border-radius: 8px; /* 圆角8px */
+            font-size: 14px; /* 文字大小 */
+            outline: none; /* 去掉点击高亮框 */
         }
+
+        /* 输入框获得焦点时：边框变蓝 */
         .editor-item input:focus,
         .editor-item textarea:focus {
             border-color: #0088ff;
         }
 
-        /* 预览卡片 */
+        /* ====================================== */
+        /* 预览卡片样式：最终展示的留言卡片 */
+        /* ====================================== */
         .preview {
-            background: #fff;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            margin-bottom: 15px;
+            background: #fff; /* 白色背景 */
+            padding: 20px; /* 内边距20px */
+            border-radius: 12px; /* 圆角12px */
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05); /* 阴影 */
+            margin-bottom: 15px; /* 下方间距15px */
         }
+
+        /* 卡片内部布局：头像 + 内容 横向排列 */
         .message-card {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
+            display: flex; /* 弹性布局 */
+            align-items: flex-start; /* 顶部对齐 */
+            gap: 12px; /* 头像与内容间距12px */
         }
+
+        /* 预览区大头像 */
         .avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            object-fit: cover;
-            background: #eee;
+            width: 60px; /* 宽度60px */
+            height: 60px; /* 高度60px */
+            border-radius: 50%; /* 正圆形 */
+            object-fit: cover; /* 图片填充不变形 */
+            background: #eee; /* 默认背景 */
         }
+
+        /* 卡片内容区域 */
         .content {
-            flex: 1;
+            flex: 1; /* 自动占满剩余宽度 */
         }
+
+        /* 卡片名字样式 */
         .name {
-            font-size: 18px;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 6px;
+            font-size: 18px; /* 文字大小18px */
+            font-weight: bold; /* 加粗 */
+            color: #333; /* 深灰色 */
+            margin-bottom: 6px; /* 下方间距6px */
         }
+
+        /* 卡片留言文字 */
         .text {
-            font-size: 16px;
-            color: #333;
-            line-height: 1.4;
-            margin-bottom: 10px;
+            font-size: 16px; /* 文字大小16px */
+            color: #333; /* 深灰色 */
+            line-height: 1.4; /* 行高，文字更舒服 */
+            margin-bottom: 10px; /* 下方间距10px */
         }
+
+        /* 卡片底部栏：来源 + 时间 + 点赞 */
         .footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            font-size: 14px;
-            color: #999;
+            display: flex; /* 横向排列 */
+            justify-content: space-between; /* 自动分散对齐 */
+            align-items: center; /* 垂直居中 */
+            width: 100%; /* 宽度占满 */
+            font-size: 14px; /* 文字大小14px */
+            color: #999; /* 浅灰色文字 */
         }
 
-        /* 小屏适配 */
+        /* ====================================== */
+        /* 小屏幕手机适配：宽度小于375px时生效 */
+        /* ====================================== */
         @media (max-width: 375px) {
-            .avatar { width: 50px; height: 50px; }
-            .name { font-size: 16px; }
-            .text { font-size: 14px; }
-            .footer { font-size: 12px; }
+            .avatar { width: 50px; height: 50px; } /* 缩小头像 */
+            .name { font-size: 16px; } /* 缩小名字 */
+            .text { font-size: 14px; } /* 缩小留言 */
+            .footer { font-size: 12px; } /* 缩小底部文字 */
         }
 
-        /* 滑动提示 */
+        /* ====================================== */
+        /* 滑动提示文字：卡片1左滑→卡片2 */
+        /* ====================================== */
         .hint {
-            text-align: center;
-            font-size: 12px;
-            color: #999;
-            margin-bottom: 10px;
+            text-align: center; /* 居中 */
+            font-size: 12px; /* 小号文字 */
+            color: #999; /* 浅灰色 */
+            margin-bottom: 10px; /* 下方间距 */
         }
     </style>
 </head>
@@ -258,7 +304,7 @@
     </div>
 
 <script>
-    // ========== 修正后滑动逻辑 ==========
+    // ========== 滑动逻辑 ==========
     const slider = document.getElementById('editorSlider');
     let startX = 0, moving = false, currentPage = 0;
 
@@ -306,11 +352,8 @@
         if (!moving) return;
         moving = false;
         const dx = e.clientX - startX;
-        if (currentPage === 0 && dx < -50) {
-            currentPage = 1;
-        } else if (currentPage === 1 && dx > 50) {
-            currentPage = 0;
-        }
+        if (currentPage === 0 && dx < -50) currentPage = 1;
+        else if (currentPage === 1 && dx > 50) currentPage = 0;
         slider.style.transform = `translateX(${-currentPage * 100}%)`;
     });
 
